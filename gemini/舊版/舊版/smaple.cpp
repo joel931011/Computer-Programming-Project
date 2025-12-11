@@ -1,6 +1,6 @@
 /**
  * Main.cpp
- * ¾ã¦X¡G¥D¨¤¡B¼Ä¤H¡BBoss¡B¹D¨ã¡B¤l¼u¡BUI¡B­µ®Ä¡Bª¬ºA¾÷
+ * æ•´åˆï¼šä¸»è§’ã€æ•µäººã€Bossã€é“å…·ã€å­å½ˆã€UIã€éŸ³æ•ˆã€ç‹€æ…‹æ©Ÿ
  */
 
 #include <SDL.h>
@@ -14,7 +14,7 @@
 #include <ctime>
 #include <cstdlib>
 
-// ¤Ş¤J¦Û©w¸qÃş§O
+// å¼•å…¥è‡ªå®šç¾©é¡åˆ¥
 #include "header/LTexture.h"
 #include "header/player.h"
 #include "header/enemy.h"
@@ -23,11 +23,11 @@
 #include "header/magnifier.h"
 #include "header/heal.h"
 
-// --- ¥ş°ì±`¼Æ ---
+// --- å…¨åŸŸå¸¸æ•¸ ---
 const int SCREEN_WIDTH = 1600;
 const int SCREEN_HEIGHT = 900;
 
-// --- ¹CÀ¸ª¬ºA ---
+// --- éŠæˆ²ç‹€æ…‹ ---
 enum GameState {
     STATE_MENU,
     STATE_INSTRUCTION,
@@ -43,41 +43,41 @@ enum LevelStage {
     BOSS_2_FIGHT
 };
 
-// --- ¥ş°ìÅÜ¼Æ (SDL ¬ÛÃö) ---
+// --- å…¨åŸŸè®Šæ•¸ (SDL ç›¸é—œ) ---
 SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
 TTF_Font* gFont = NULL;
 
-// --- ¥ş°ìÅÜ¼Æ (¯¾²z¸ê·½) ---
+// --- å…¨åŸŸè®Šæ•¸ (ç´‹ç†è³‡æº) ---
 LTexture gMenuTexture;
 LTexture gInstructionTexture;
 LTexture gGameOverTexture;
 LTexture gWinTexture;
-LTexture gBGTexture; // ­I´º¹Ï
+LTexture gBGTexture; // èƒŒæ™¯åœ–
 
-// ¨¤¦â»P¹D¨ã¯¾²z
+// è§’è‰²èˆ‡é“å…·ç´‹ç†
 LTexture gPlayerFront, gPlayerLeft, gPlayerRight;
 LTexture gEnemyTexture1;
 LTexture gEnemyTexture2;
 LTexture gEnemyTexture3;
 LTexture gBossTexture;
-LTexture gBulletTexture;      // ¥D¨¤¤l¼u
-LTexture gEnemyBulletTexture; // ¼Ä¤H¤l¼u
-LTexture gMagnifierTexture;   // ¹D¨ã
-LTexture gHealTexture;     //¦^¦å
+LTexture gBulletTexture;      // ä¸»è§’å­å½ˆ
+LTexture gEnemyBulletTexture; // æ•µäººå­å½ˆ
+LTexture gMagnifierTexture;   // é“å…·
+LTexture gHealTexture;     //å›è¡€
 
-// UI ¯¾²z
+// UI ç´‹ç†
 LTexture gScoreTextTexture;
 LTexture gHealthIconTexture;
 
-// --- ¥ş°ìÅÜ¼Æ (­µ®Ä¸ê·½) ---
+// --- å…¨åŸŸè®Šæ•¸ (éŸ³æ•ˆè³‡æº) ---
 Mix_Music *gMusic = NULL;
 Mix_Chunk *gLaserSound = NULL;
 Mix_Chunk *gExplosionSound = NULL;
 Mix_Chunk *gItemSound = NULL;
 Mix_Chunk *gHealSound = NULL;
 
-// --- ¥ş°ìÅÜ¼Æ (¹CÀ¸ª«¥óºŞ²z) ---
+// --- å…¨åŸŸè®Šæ•¸ (éŠæˆ²ç‰©ä»¶ç®¡ç†) ---
 Player* gpPlayer = NULL;
 Boss* gpBoss = NULL;
 std::vector<Enemy*> gEnemies;
@@ -86,67 +86,67 @@ std::vector<Magnifier*> gItems;
 std::vector<Heal*> gHeals;
 
 
-// --- ¥ş°ìÅÜ¼Æ (¹CÀ¸ÅŞ¿è) ---
+// --- å…¨åŸŸè®Šæ•¸ (éŠæˆ²é‚è¼¯) ---
 GameState gCurrentState = STATE_MENU;
 LevelStage gLevelStage = STAGE_1;
 int gEnemiesDefeated = 0;
 int gScore = 0;
 
-// --- ¨ç¦¡«Å§i ---
+// --- å‡½å¼å®£å‘Š ---
 bool init();
 bool loadMedia();
 void close();
 void resetGame();
 
 // =============================================================
-// ¥Dµ{¦¡
+// ä¸»ç¨‹å¼
 // =============================================================
 
 int main(int argc, char* args[])
 {
-    // 1. ªì©l¤Æ¶Ã¼ÆºØ¤l
+    // 1. åˆå§‹åŒ–äº‚æ•¸ç¨®å­
     srand((unsigned)time(NULL));
 
-    // 2. ªì©l¤Æ SDL
+    // 2. åˆå§‹åŒ– SDL
     if( !init() ) {
         printf( "Failed to initialize!\n" );
         return -1;
     }
 
-    // 3. ¸ü¤J´CÅé
+    // 3. è¼‰å…¥åª’é«”
     if( !loadMedia() ) {
         printf( "Failed to load media!\n" );
         return -1;
     }
 
-    // 4. «Ø¥ß¥D¨¤ª«¥ó (¦¹®É¯¾²z¤w¸ü¤J)
+    // 4. å»ºç«‹ä¸»è§’ç‰©ä»¶ (æ­¤æ™‚ç´‹ç†å·²è¼‰å…¥)
     gpPlayer = new Player(&gPlayerFront, &gPlayerLeft, &gPlayerRight);
 
-    // ¼½©ñ­I´º­µ¼Ö
+    // æ’­æ”¾èƒŒæ™¯éŸ³æ¨‚
     Mix_PlayMusic( gMusic, -1 );
 
     bool quit = false;
     SDL_Event e;
-    SDL_Color textColor = { 255, 255, 255 }; // ¥Õ¦â¤å¦r
+    SDL_Color textColor = { 255, 255, 255 }; // ç™½è‰²æ–‡å­—
 
-    // --- ¹CÀ¸¥D°j°é ---
+    // --- éŠæˆ²ä¸»è¿´åœˆ ---
     while( !quit )
     {
-        // --- ¨Æ¥ó³B²z ---
+        // --- äº‹ä»¶è™•ç† ---
         while( SDL_PollEvent( &e ) != 0 )
         {
             if( e.type == SDL_QUIT ) quit = true;
 
-            // ®Ú¾Úª¬ºA³B²z«öÁä
+            // æ ¹æ“šç‹€æ…‹è™•ç†æŒ‰éµ
             switch(gCurrentState)
             {
                 case STATE_MENU:
                     if (e.type == SDL_KEYDOWN) {
-                        if (e.key.keysym.sym == SDLK_RETURN) { // Enter ¶}©l
+                        if (e.key.keysym.sym == SDLK_RETURN) { // Enter é–‹å§‹
                             resetGame();
                             gCurrentState = STATE_PLAYING;
                         }
-                        else if (e.key.keysym.sym == SDLK_i) { // I ¬İ»¡©ú
+                        else if (e.key.keysym.sym == SDLK_i) { // I çœ‹èªªæ˜
                             gCurrentState = STATE_INSTRUCTION;
                         }
                     }
@@ -163,13 +163,13 @@ int main(int argc, char* args[])
                 case STATE_PLAYING:
                     gpPlayer->handleEvent(e);
 
-                    // µo®g¤l¼u
+                    // ç™¼å°„å­å½ˆ
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
                         std::vector<Bullet*> newShots = gpPlayer->fire(&gBulletTexture);
                         gBullets.insert(gBullets.end(), newShots.begin(), newShots.end());
                         Mix_PlayChannel( -1, gLaserSound, 0 );
                     }
-                    // ¼È°±©Î¦^¨ì¿ï³æ (¥i¿ï)
+                    // æš«åœæˆ–å›åˆ°é¸å–® (å¯é¸)
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
                         gCurrentState = STATE_MENU;
                     }
@@ -178,7 +178,7 @@ int main(int argc, char* args[])
                 case STATE_GAME_OVER:
                 case STATE_WIN:
                     if (e.type == SDL_KEYDOWN) {
-                        if (e.key.keysym.sym == SDLK_r) { // R ­«¨Ó
+                        if (e.key.keysym.sym == SDLK_r) { // R é‡ä¾†
                             resetGame();
                             gCurrentState = STATE_PLAYING;
                         }
@@ -187,18 +187,18 @@ int main(int argc, char* args[])
             }
         }
 
-        // --- ÅŞ¿è§ó·s (Update) ---
+        // --- é‚è¼¯æ›´æ–° (Update) ---
         if (gCurrentState == STATE_PLAYING)
         {
-            // 1. §ó·s¥D¨¤
+            // 1. æ›´æ–°ä¸»è§’
             gpPlayer->move();
             gpPlayer->updateScatterStatus();
 
-            // 2. ¥Í¦¨»P§ó·s¼Ä¤H/Boss (Ãö¥d¬yµ{)
+            // 2. ç”Ÿæˆèˆ‡æ›´æ–°æ•µäºº/Boss (é—œå¡æµç¨‹)
             switch (gLevelStage)
             {
                 case STAGE_1:
-                    if (rand() % 60 == 0) { // ¥Í¦¨¼Ä¤HÀW²v
+                    if (rand() % 60 == 0) { // ç”Ÿæˆæ•µäººé »ç‡
                         gEnemies.push_back(new Enemy(rand() % (SCREEN_WIDTH - 60), -60, &gEnemyTexture1, &gEnemyTexture2, &gEnemyTexture3));
                     }
                     if (gEnemiesDefeated >= 10) {
@@ -209,21 +209,21 @@ int main(int argc, char* args[])
 
                 case BOSS_1_FIGHT:
                 case BOSS_2_FIGHT:
-                    // Boss ¾Ô¤£¥Í¦¨¤p§L
+                    // Boss æˆ°ä¸ç”Ÿæˆå°å…µ
                     break;
 
                 case STAGE_2:
-                    if (rand() % 40 == 0) { // ¥Í¦¨¸û§Ö
+                    if (rand() % 40 == 0) { // ç”Ÿæˆè¼ƒå¿«
                         gEnemies.push_back(new Enemy(rand() % (SCREEN_WIDTH - 60), -60, &gEnemyTexture1, &gEnemyTexture2, &gEnemyTexture3));
                     }
-                    if (gEnemiesDefeated >= 25) { // ²Ö¿nÀ»±ş
+                    if (gEnemiesDefeated >= 25) { // ç´¯ç©æ“Šæ®º
                         gLevelStage = BOSS_2_FIGHT;
                         gpBoss = new Boss((SCREEN_WIDTH-100)/2, -100, &gBossTexture, 2);
                     }
                     break;
             }
 
-            // §ó·s Boss
+            // æ›´æ–° Boss
             if (gpBoss) {
                 gpBoss->move();
                 std::vector<Bullet*> bShots = gpBoss->fire(&gEnemyBulletTexture);
@@ -239,7 +239,7 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 3. §ó·s¼Ä¤H & ÀH¾÷±¼Ä_
+            // 3. æ›´æ–°æ•µäºº & éš¨æ©Ÿæ‰å¯¶
             for (int i = 0; i < gEnemies.size(); i++) {
                 gEnemies[i]->move();
                 std::vector<Bullet*> eShots = gEnemies[i]->fire(&gEnemyBulletTexture);
@@ -251,18 +251,18 @@ int main(int argc, char* args[])
                         gScore += 100;
                         Mix_PlayChannel(-1, gExplosionSound, 0);
 
-                        // ±¼¸¨¹D¨ã (20% ¾÷²v)
+                        // æ‰è½é“å…· (20% æ©Ÿç‡)
                         if (rand() % 5 == 0) {
-                             // ¹D¨ã¥Í¦¨¦b¼Ä¤H¦º¤`¦ì¸m
-                             // ­Y Magnifier «Øºc¤l¤£»İ­n®y¼Ğ¡A«h¥Î gItems.push_back(new Magnifier());
-                             // ­Y§Ú­Ì§ï¦^»İ­n®y¼Ğªºª©¥»:
+                             // é“å…·ç”Ÿæˆåœ¨æ•µäººæ­»äº¡ä½ç½®
+                             // è‹¥ Magnifier å»ºæ§‹å­ä¸éœ€è¦åº§æ¨™ï¼Œå‰‡ç”¨ gItems.push_back(new Magnifier());
+                             // è‹¥æˆ‘å€‘æ”¹å›éœ€è¦åº§æ¨™çš„ç‰ˆæœ¬:
                              gItems.push_back(new Magnifier(gEnemies[i]->getPosX(), gEnemies[i]->getPosY()));
                         }
-                        // ±¼¸¨heals (25% ¾÷²v)
+                        // æ‰è½heals (25% æ©Ÿç‡)
                         if (rand() % 4 == 0) {
-                             // heal¥Í¦¨¦b¼Ä¤H¦º¤`¦ì¸mªşªñ
-                             // ­Y Heal «Øºc¤l¤£»İ­n®y¼Ğ¡A«h¥Î gHeals.push_back(new Heal());
-                             // ­Y§Ú­Ì§ï¦^»İ­n®y¼Ğªºª©¥»:
+                             // healç”Ÿæˆåœ¨æ•µäººæ­»äº¡ä½ç½®é™„è¿‘
+                             // è‹¥ Heal å»ºæ§‹å­ä¸éœ€è¦åº§æ¨™ï¼Œå‰‡ç”¨ gHeals.push_back(new Heal());
+                             // è‹¥æˆ‘å€‘æ”¹å›éœ€è¦åº§æ¨™çš„ç‰ˆæœ¬:
                              gHeals.push_back(new Heal(gEnemies[i]->getPosX()+30, gEnemies[i]->getPosY()-30));
                         }
                     }
@@ -272,15 +272,15 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 4. §ó·s¤l¼u»P¸I¼²ÀË´ú
+            // 4. æ›´æ–°å­å½ˆèˆ‡ç¢°æ’æª¢æ¸¬
             for (int i = 0; i < gBullets.size(); i++) {
                 gBullets[i]->move();
                 SDL_Rect bRect = gBullets[i]->getCollider();
                 bool hit = false;
 
-                // ¥D¨¤¤l¼u vs ¼Ä¤H/Boss
+                // ä¸»è§’å­å½ˆ vs æ•µäºº/Boss
                 if (gBullets[i]->getIsFromPlayer()) {
-                    // ¼²¼Ä¤H
+                    // æ’æ•µäºº
                     for (auto& e : gEnemies) {
                         SDL_Rect eRect = e->getCollider();
                         if (SDL_HasIntersection(&bRect, &eRect)) {
@@ -289,7 +289,7 @@ int main(int argc, char* args[])
                             break;
                         }
                     }
-                    // ¼² Boss
+                    // æ’ Boss
                     if (!hit && gpBoss) {
                         SDL_Rect bossRect = gpBoss->getCollider();
                         if (SDL_HasIntersection(&bRect, &bossRect)) {
@@ -298,13 +298,13 @@ int main(int argc, char* args[])
                         }
                     }
                 }
-                // ¼Ä¤H¤l¼u vs ¥D¨¤
+                // æ•µäººå­å½ˆ vs ä¸»è§’
                 else {
                     SDL_Rect pRect = gpPlayer->getCollider();
                     if (SDL_HasIntersection(&bRect, &pRect)) {
                         gpPlayer->takeDamage(1);
                         hit = true;
-                        // ¥i¥H¥[¨ü¶Ë­µ®Ä
+                        // å¯ä»¥åŠ å—å‚·éŸ³æ•ˆ
                     }
                 }
 
@@ -317,13 +317,13 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 5.1 §ó·s¹D¨ã
+            // 5.1 æ›´æ–°é“å…·
             SDL_Rect pRect = gpPlayer->getCollider();
             for (int i = 0; i < gItems.size(); i++) {
                 gItems[i]->move();
                 SDL_Rect itemRect = gItems[i]->getCollider();
 
-                // ¦Y¨ì¹D¨ã
+                // åƒåˆ°é“å…·
                 if (SDL_HasIntersection(&pRect, &itemRect)) {
                     gpPlayer->activateScatter();
                     gItems[i]->setTaken();
@@ -337,13 +337,13 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 5.2 §ó·sheals
+            // 5.2 æ›´æ–°heals
             //SDL_Rect pRect = gpPlayer->getCollider();
             for (int i = 0; i < gHeals.size(); i++) {
                 gHeals[i]->move();
                 SDL_Rect healRect = gHeals[i]->getCollider();
 
-                // ¦Y¨ìheal
+                // åƒåˆ°heal
                 if (SDL_HasIntersection(&pRect, &healRect)) {
                     if ((gpPlayer->getHealth())<5)
                     {
@@ -360,15 +360,15 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 6. ÀË¬d¥D¨¤¥Í¦º
+            // 6. æª¢æŸ¥ä¸»è§’ç”Ÿæ­»
             if (gpPlayer->getHealth() <= 0) {
                 gCurrentState = STATE_GAME_OVER;
             }
         }
 
-        // --- ´è¬V (Render) ---
+        // --- æ¸²æŸ“ (Render) ---
 
-        // ²M°£µe­± (¶Â¦â­I´º)
+        // æ¸…é™¤ç•«é¢ (é»‘è‰²èƒŒæ™¯)
         SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
         SDL_RenderClear( gRenderer );
 
@@ -379,10 +379,10 @@ int main(int argc, char* args[])
             gInstructionTexture.render(0, 0);
         }
         else if (gCurrentState == STATE_PLAYING) {
-            // µe­I´º (¦p¦³)
+            // ç•«èƒŒæ™¯ (å¦‚æœ‰)
             gBGTexture.render(0, 0);
 
-            // µe¨¤¦â
+            // ç•«è§’è‰²
             gpPlayer->render();
             if (gpBoss) gpBoss->render();
             for (auto e : gEnemies) e->render();
@@ -390,7 +390,7 @@ int main(int argc, char* args[])
             for (auto item : gItems) item->render();
             for (auto heal : gHeals) heal->render();
 
-            // µe UI
+            // ç•« UI
             std::stringstream timeText;
             timeText << "Score: " << gScore << "  HP: " << gpPlayer->getHealth();
             gScoreTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor, gFont, gRenderer);
@@ -401,14 +401,14 @@ int main(int argc, char* args[])
         else if (gCurrentState == STATE_GAME_OVER) {
             gGameOverTexture.render(0, 0);
 
-            // Åã¥Ü³Ì²×¤À¼Æ
+            // é¡¯ç¤ºæœ€çµ‚åˆ†æ•¸
             std::stringstream finalScore;
             finalScore << "Final Score: " << gScore;
             gScoreTextTexture.loadFromRenderedText(finalScore.str().c_str(), textColor, gFont, gRenderer);
             gScoreTextTexture.render(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 + 50);
         }
         else if (gCurrentState == STATE_WIN) {
-            // °²³]§A¦³³Ó§Q¹Ï¡A­Y¨S¦³´N¦@¥Î GameOver ©Î¯Â¤å¦r
+            // å‡è¨­ä½ æœ‰å‹åˆ©åœ–ï¼Œè‹¥æ²’æœ‰å°±å…±ç”¨ GameOver æˆ–ç´”æ–‡å­—
             if (gWinTexture.getWidth() > 0) gWinTexture.render(0, 0);
             else gGameOverTexture.render(0, 0);
 
@@ -418,24 +418,24 @@ int main(int argc, char* args[])
             gScoreTextTexture.render(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2);
         }
 
-        // §ó·s¿Ã¹õ
+        // æ›´æ–°è¢å¹•
         SDL_RenderPresent( gRenderer );
     }
 
-    // ÄÀ©ñ¸ê·½¨Ã°h¥X
+    // é‡‹æ”¾è³‡æºä¸¦é€€å‡º
     close();
     return 0;
 }
 
 // =============================================================
-// »²§U¨ç¦¡¹ê§@
+// è¼”åŠ©å‡½å¼å¯¦ä½œ
 // =============================================================
 
 bool init()
 {
     if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 ) return false;
 
-    // ³]©w½u©Ê¹LÂo
+    // è¨­å®šç·šæ€§éæ¿¾
     if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) ) {}
 
     gWindow = SDL_CreateWindow( "EEmission", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
@@ -463,18 +463,18 @@ bool loadMedia()
 {
     bool success = true;
 
-    // ¸ü¤J¦rÅé
+    // è¼‰å…¥å­—é«”
     gFont = TTF_OpenFont( "BoutiqueBitmap9x9_1.92.ttf", 28 );
     if( gFont == NULL ) { printf("Failed to load font!\n"); success = false; }
 
-    // ¸ü¤J¤¶­±¹Ï¤ù (½Ğ¦Û¦æ·Ç³Æ³o¨Ç¹Ï¤ù)
+    // è¼‰å…¥ä»‹é¢åœ–ç‰‡ (è«‹è‡ªè¡Œæº–å‚™é€™äº›åœ–ç‰‡)
     if( !gMenuTexture.loadFromFile( "menu.png", gRenderer ) ) success = false;
     if( !gInstructionTexture.loadFromFile( "instruction.png", gRenderer ) ) success = false;
     if( !gGameOverTexture.loadFromFile( "gameover.png", gRenderer ) ) success = false;
-    // gWinTexture.loadFromFile("win.png", gRenderer); // ¥i¿ï
-    // gBGTexture.loadFromFile("bg.png", gRenderer);   // ¥i¿ï
+    // gWinTexture.loadFromFile("win.png", gRenderer); // å¯é¸
+    // gBGTexture.loadFromFile("bg.png", gRenderer);   // å¯é¸
 
-    // ¸ü¤J¨¤¦â¹Ï¤ù
+    // è¼‰å…¥è§’è‰²åœ–ç‰‡
     if( !gPlayerFront.loadFromFile( "player.png", gRenderer ) ) success = false;
     if( !gPlayerLeft.loadFromFile( "player_left.png", gRenderer ) ) success = false;
     if( !gPlayerRight.loadFromFile( "player_right.png", gRenderer ) ) success = false;
@@ -489,11 +489,11 @@ bool loadMedia()
     if( !gMagnifierTexture.loadFromFile( "magnifier.png", gRenderer ) ) success = false;
     if( !gHealTexture.loadFromFile( "heal.png", gRenderer ) ) success = false;
 
-    // ¸ü¤J­µ®Ä
+    // è¼‰å…¥éŸ³æ•ˆ
     gMusic = Mix_LoadMUS( "bgm.mp3" );
     gLaserSound = Mix_LoadWAV( "laser.wav" );
     gExplosionSound = Mix_LoadWAV( "explosion.wav" );
-    gItemSound = Mix_LoadWAV( "item.wav" ); // °²³]§A¦³³o­Ó
+    gItemSound = Mix_LoadWAV( "item.wav" ); // å‡è¨­ä½ æœ‰é€™å€‹
     gHealSound = Mix_LoadWAV( "heal.wav" );
 
     return success;
@@ -501,7 +501,7 @@ bool loadMedia()
 
 void close()
 {
-    // ÄÀ©ñª«¥ó
+    // é‡‹æ”¾ç‰©ä»¶
     if(gpPlayer) delete gpPlayer;
     if(gpBoss) delete gpBoss;
     for(auto e : gEnemies) delete e;
@@ -509,7 +509,7 @@ void close()
     for(auto i : gItems) delete i;
     for(auto j : gHeals) delete j;
 
-    // ÄÀ©ñ¯¾²z
+    // é‡‹æ”¾ç´‹ç†
     gPlayerFront.free();
     gPlayerLeft.free();
     gPlayerRight.free();
@@ -527,14 +527,14 @@ void close()
     gScoreTextTexture.free();
     gHealthIconTexture.free();
 
-    // ÄÀ©ñ­µ®Ä
+    // é‡‹æ”¾éŸ³æ•ˆ
     Mix_FreeMusic( gMusic );
     Mix_FreeChunk( gLaserSound );
     Mix_FreeChunk( gExplosionSound );
     Mix_FreeChunk( gItemSound );
     Mix_FreeChunk( gHealSound );
 
-    // Ãö³¬ SDL ¤l¨t²Î
+    // é—œé–‰ SDL å­ç³»çµ±
     TTF_CloseFont( gFont );
     SDL_DestroyRenderer( gRenderer );
     SDL_DestroyWindow( gWindow );
@@ -547,24 +547,24 @@ void close()
 
 void resetGame()
 {
-    // ­«¸mÃö¥d¼Æ­È
+    // é‡ç½®é—œå¡æ•¸å€¼
     gEnemiesDefeated = 0;
     gScore = 0;
     gLevelStage = STAGE_1;
 
-    // ­«¸m¥D¨¤ (³o¸Ì°²³] Player Ãş§O¦³¹ê§@ reset)
-    // ¦pªG¨S¦³¡A§A¤]¥i¥H¦b³o¸Ì delete gpPlayer; gpPlayer = new Player(...);
+    // é‡ç½®ä¸»è§’ (é€™è£¡å‡è¨­ Player é¡åˆ¥æœ‰å¯¦ä½œ reset)
+    // å¦‚æœæ²’æœ‰ï¼Œä½ ä¹Ÿå¯ä»¥åœ¨é€™è£¡ delete gpPlayer; gpPlayer = new Player(...);
     if(gpPlayer) {
-        // Â²³æªº¤è¦¡¡Gª½±µ­«¸m¦ì¸m©M¦å¶q
-        // ¦pªG§Aªº Player Ãş§O¨S¦³ reset()¡A½Ğ°O±o¥[¤W¥h
+        // ç°¡å–®çš„æ–¹å¼ï¼šç›´æ¥é‡ç½®ä½ç½®å’Œè¡€é‡
+        // å¦‚æœä½ çš„ Player é¡åˆ¥æ²’æœ‰ reset()ï¼Œè«‹è¨˜å¾—åŠ ä¸Šå»
         // gpPlayer->reset();
 
-        // ©ÎªÌ¤â°Ê­«¸m¡G
+        // æˆ–è€…æ‰‹å‹•é‡ç½®ï¼š
         delete gpPlayer;
         gpPlayer = new Player(&gPlayerFront, &gPlayerLeft, &gPlayerRight);
     }
 
-    // ²MªÅ¼Ä¤H¡B¤l¼u¡B¹D¨ã¡BBoss
+    // æ¸…ç©ºæ•µäººã€å­å½ˆã€é“å…·ã€Boss
     for(auto e : gEnemies) delete e;
     gEnemies.clear();
 
@@ -582,3 +582,4 @@ void resetGame()
         gpBoss = NULL;
     }
 }
+
