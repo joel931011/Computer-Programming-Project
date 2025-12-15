@@ -1,6 +1,6 @@
 /**
  * Main.cpp
- * ¾ã¦X¡G¥D¨¤¡B¼Ä¤H¡BBoss¡B¹D¨ã¡B¤l¼u¡BUI¡B­µ®Ä¡Bª¬ºA¾÷
+ * æ•´åˆï¼šä¸»è§’ã€æ•µäººã€Bossã€é“å…·ã€å­å½ˆã€UIã€éŸ³æ•ˆã€ç‹€æ…‹æ©Ÿ
  */
 
 #include <SDL.h>
@@ -14,7 +14,7 @@
 #include <ctime>
 #include <cstdlib>
 
-// ¤Ş¤J¦Û©w¸qÃş§O
+// å¼•å…¥è‡ªå®šç¾©é¡åˆ¥
 #include "header/LTexture.h"
 #include "header/player.h"
 #include "header/enemy.h"
@@ -23,14 +23,14 @@
 #include "header/magnifier.h"
 #include "header/heal.h"
 
-// --- ¥ş°ì±`¼Æ ---
+// --- å…¨åŸŸå¸¸æ•¸ ---
 const int SCREEN_WIDTH = 1600;
 const int SCREEN_HEIGHT = 900;
 
-// --- ¹CÀ¸ª¬ºA ---
+// --- éŠæˆ²ç‹€æ…‹ ---
 enum GameState {
     STATE_MENU,
-    STATE_TUTORIAL, // ¨ú¥N­ì¥»ªº INSTRUCTION
+    STATE_TUTORIAL, // å–ä»£åŸæœ¬çš„ INSTRUCTION
     STATE_PLAYING,
     STATE_GAME_OVER,
     STATE_WIN
@@ -39,13 +39,13 @@ enum GameState {
 enum TutorialStep {
     TUT_INTRO_1,
     TUT_INTRO_2,
-    TUT_INTRO_3,      // 1. Åã¥ÜºëÆF»P²Ä1-3¬q¤å¦r
-    TUT_ENEMY_ACTION,    // 2. ¥X²{¼Ä¤HÅıª±®a¥´
-    TUT_ENEMY_TEXT,      // 3. ¥´¦º«áÅã¥Ü²Ä¤G¬q¤å¦r
-    TUT_ITEM_MAG_ACTION, // 4. ¥X²{©ñ¤jÃè
-    TUT_ITEM_MAG_TEXT,   // 5. ¦Y¨ì«áÅã¥Ü²Ä¤T¬q¤å¦r
-    TUT_ITEM_HEAL_ACTION,// 6. ¥X²{¸É¦å
-    TUT_FINAL_TEXT       // 7. ³Ì«á¤å¦r -> ¶i¹CÀ¸
+    TUT_INTRO_3,      // 1. é¡¯ç¤ºç²¾éˆèˆ‡ç¬¬1-3æ®µæ–‡å­—
+    TUT_ENEMY_ACTION,    // 2. å‡ºç¾æ•µäººè®“ç©å®¶æ‰“
+    TUT_ENEMY_TEXT,      // 3. æ‰“æ­»å¾Œé¡¯ç¤ºç¬¬äºŒæ®µæ–‡å­—
+    TUT_ITEM_MAG_ACTION, // 4. å‡ºç¾æ”¾å¤§é¡
+    TUT_ITEM_MAG_TEXT,   // 5. åƒåˆ°å¾Œé¡¯ç¤ºç¬¬ä¸‰æ®µæ–‡å­—
+    TUT_ITEM_HEAL_ACTION,// 6. å‡ºç¾è£œè¡€
+    TUT_FINAL_TEXT       // 7. æœ€å¾Œæ–‡å­— -> é€²éŠæˆ²
 };
 
 enum LevelStage {
@@ -55,45 +55,45 @@ enum LevelStage {
     BOSS_2_FIGHT
 };
 
-// --- ¥ş°ìÅÜ¼Æ (SDL ¬ÛÃö) ---
+// --- å…¨åŸŸè®Šæ•¸ (SDL ç›¸é—œ) ---
 SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
 TTF_Font* gFont = NULL;
 
-// --- ¥ş°ìÅÜ¼Æ (¯¾²z¸ê·½) ---
+// --- å…¨åŸŸè®Šæ•¸ (ç´‹ç†è³‡æº) ---
 LTexture gMenuTexture;
 LTexture gInstructionTexture;
 LTexture gGameOverTexture;
 LTexture gWinTexture;
-LTexture gBGTexture; // ­I´º¹Ï
+LTexture gBGTexture; // èƒŒæ™¯åœ–
 TutorialStep gTutStep = TUT_INTRO_1;
-LTexture gHelperTexture; // °O±o·Ç³Æ¤@±iºëÆF¹Ï¤ù helper.png
+LTexture gHelperTexture; // è¨˜å¾—æº–å‚™ä¸€å¼µç²¾éˆåœ–ç‰‡ helper.png
 
-bool gTutObjectSpawned = false; // ¥Î¨Ó½T«O±Ğ¾Çª«¥ó¥u¥Í¦¨¤@¦¸
+bool gTutObjectSpawned = false; // ç”¨ä¾†ç¢ºä¿æ•™å­¸ç‰©ä»¶åªç”Ÿæˆä¸€æ¬¡
 
-// ¨¤¦â»P¹D¨ã¯¾²z
+// è§’è‰²èˆ‡é“å…·ç´‹ç†
 LTexture gPlayerFront, gPlayerLeft, gPlayerRight;
 LTexture gEnemyTexture1;
 LTexture gEnemyTexture2;
 LTexture gEnemyTexture3;
 LTexture gBossTexture;
-LTexture gBulletTexture;      // ¥D¨¤¤l¼u
-LTexture gEnemyBulletTexture; // ¼Ä¤H¤l¼u
-LTexture gMagnifierTexture;   // ¹D¨ã
-LTexture gHealTexture;     //¦^¦å
+LTexture gBulletTexture;      // ä¸»è§’å­å½ˆ
+LTexture gEnemyBulletTexture; // æ•µäººå­å½ˆ
+LTexture gMagnifierTexture;   // é“å…·
+LTexture gHealTexture;     //å›è¡€
 
-// UI ¯¾²z
+// UI ç´‹ç†
 LTexture gScoreTextTexture;
 LTexture gHealthIconTexture;
 
-// --- ¥ş°ìÅÜ¼Æ (­µ®Ä¸ê·½) ---
+// --- å…¨åŸŸè®Šæ•¸ (éŸ³æ•ˆè³‡æº) ---
 Mix_Music *gMusic = NULL;
 Mix_Chunk *gLaserSound = NULL;
 Mix_Chunk *gExplosionSound = NULL;
 Mix_Chunk *gItemSound = NULL;
 Mix_Chunk *gHealSound = NULL;
 
-// --- ¥ş°ìÅÜ¼Æ (¹CÀ¸ª«¥óºŞ²z) ---
+// --- å…¨åŸŸè®Šæ•¸ (éŠæˆ²ç‰©ä»¶ç®¡ç†) ---
 Player* gpPlayer = NULL;
 Boss* gpBoss = NULL;
 std::vector<Enemy*> gEnemies;
@@ -102,95 +102,95 @@ std::vector<Magnifier*> gItems;
 std::vector<Heal*> gHeals;
 
 
-// --- ¥ş°ìÅÜ¼Æ (¹CÀ¸ÅŞ¿è) ---
+// --- å…¨åŸŸè®Šæ•¸ (éŠæˆ²é‚è¼¯) ---
 GameState gCurrentState = STATE_MENU;
 LevelStage gLevelStage = STAGE_1;
 int gEnemiesDefeated = 0;
 int gScore = 0;
 
-// --- ¨ç¦¡«Å§i ---
+// --- å‡½å¼å®£å‘Š ---
 bool init();
 bool loadMedia();
 void close();
 void resetGame();
 void renderTutorialBox(std::string text);
 // =============================================================
-// ¥Dµ{¦¡
+// ä¸»ç¨‹å¼
 // =============================================================
 
 int main(int argc, char* args[])
 {
-    // 1. ªì©l¤Æ¶Ã¼ÆºØ¤l
+    // 1. åˆå§‹åŒ–äº‚æ•¸ç¨®å­
     srand((unsigned)time(NULL));
 
-    // 2. ªì©l¤Æ SDL
+    // 2. åˆå§‹åŒ– SDL
     if( !init() ) {
         printf( "Failed to initialize!\n" );
         return -1;
     }
 
-    // 3. ¸ü¤J´CÅé
+    // 3. è¼‰å…¥åª’é«”
     if( !loadMedia() ) {
         printf( "Failed to load media!\n" );
         return -1;
     }
 
-    // 4. «Ø¥ß¥D¨¤ª«¥ó (¦¹®É¯¾²z¤w¸ü¤J)
+    // 4. å»ºç«‹ä¸»è§’ç‰©ä»¶ (æ­¤æ™‚ç´‹ç†å·²è¼‰å…¥)
     gpPlayer = new Player(&gPlayerFront, &gPlayerLeft, &gPlayerRight);
 
-    // ¼½©ñ­I´º­µ¼Ö
+    // æ’­æ”¾èƒŒæ™¯éŸ³æ¨‚
     Mix_PlayMusic( gMusic, -1 );
 
     bool quit = false;
     SDL_Event e;
-    SDL_Color textColor = { 255, 255, 255 }; // ¥Õ¦â¤å¦r
+    SDL_Color textColor = { 255, 255, 255 }; // ç™½è‰²æ–‡å­—
 
-    // --- ¹CÀ¸¥D°j°é ---
+    // --- éŠæˆ²ä¸»è¿´åœˆ ---
     while( !quit )
     {
-        // --- ¨Æ¥ó³B²z ---
+        // --- äº‹ä»¶è™•ç† ---
         while( SDL_PollEvent( &e ) != 0 )
         {
             if( e.type == SDL_QUIT ) quit = true;
 
-            // ®Ú¾Úª¬ºA³B²z«öÁä
+            // æ ¹æ“šç‹€æ…‹è™•ç†æŒ‰éµ
             switch(gCurrentState)
             {
                 case STATE_MENU:
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_RETURN) {
-                        // resetGame(); // ¥ı­«¸m½T«O°®²b
+                        // resetGame(); // å…ˆé‡ç½®ç¢ºä¿ä¹¾æ·¨
                         gCurrentState = STATE_TUTORIAL;
-                        gTutStep = TUT_INTRO_1; // ­«³]±Ğ¾Ç¨BÆJ
+                        gTutStep = TUT_INTRO_1; // é‡è¨­æ•™å­¸æ­¥é©Ÿ
                         gTutObjectSpawned = false;
                     }
                     break;
 
                 case STATE_TUTORIAL:
-                    // ¦pªG¬O¦b¡u¬İ¤å¦r¡vªº¶¥¬q¡A«ö¤U Enter ¶i¤J¤U¤@¨B
+                    // å¦‚æœæ˜¯åœ¨ã€Œçœ‹æ–‡å­—ã€çš„éšæ®µï¼ŒæŒ‰ä¸‹ Enter é€²å…¥ä¸‹ä¸€æ­¥
                     if (gTutStep == TUT_INTRO_1 || gTutStep == TUT_INTRO_2 || gTutStep == TUT_INTRO_3 || gTutStep == TUT_ENEMY_TEXT ||
                         gTutStep == TUT_ITEM_MAG_TEXT || gTutStep == TUT_FINAL_TEXT)
                     {
                         if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_RETURN) {
-                            // ª¬ºA¤Á´«ÅŞ¿è
+                            // ç‹€æ…‹åˆ‡æ›é‚è¼¯
                             if (gTutStep == TUT_INTRO_1) gTutStep = TUT_INTRO_2;
                             else if (gTutStep == TUT_INTRO_2) gTutStep = TUT_INTRO_3;
-                            else if (gTutStep == TUT_INTRO_3) gTutStep = TUT_ENEMY_ACTION; // Á¿§¹ 3 ¬q«á¤~¥X©Ç
+                            else if (gTutStep == TUT_INTRO_3) gTutStep = TUT_ENEMY_ACTION; // è¬›å®Œ 3 æ®µå¾Œæ‰å‡ºæ€ª
 
                             else if (gTutStep == TUT_ENEMY_TEXT) gTutStep = TUT_ITEM_MAG_ACTION;
                             else if (gTutStep == TUT_ITEM_MAG_TEXT) gTutStep = TUT_ITEM_HEAL_ACTION;
                             else if (gTutStep == TUT_FINAL_TEXT) {
-                                resetGame(); // ²MªÅ±Ğ¾Ç¥ÎªºÅ¼ªF¦è
-                                gCurrentState = STATE_PLAYING; // ¥¿¦¡¶}©l
+                                resetGame(); // æ¸…ç©ºæ•™å­¸ç”¨çš„é«’æ±è¥¿
+                                gCurrentState = STATE_PLAYING; // æ­£å¼é–‹å§‹
                             }
-                            gTutObjectSpawned = false; // ­«¸m¥Í¦¨¼Ğ°O
+                            gTutObjectSpawned = false; // é‡ç½®ç”Ÿæˆæ¨™è¨˜
                         }
                     }
                     else
                     {
-                        // ¦pªG¬O¦b¡u°Ê§@¡v¶¥¬q (¥´©Ç¡B¦Y¹D¨ã)¡A¤¹³\ª±®a¾Ş±±¥D¨¤
+                        // å¦‚æœæ˜¯åœ¨ã€Œå‹•ä½œã€éšæ®µ (æ‰“æ€ªã€åƒé“å…·)ï¼Œå…è¨±ç©å®¶æ“æ§ä¸»è§’
                         gpPlayer->handleEvent(e);
                         if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
-                            // µo®g¤l¼u (½Æ»s­ì¥» Playing ªºÅŞ¿è)
+                            // ç™¼å°„å­å½ˆ (è¤‡è£½åŸæœ¬ Playing çš„é‚è¼¯)
                             std::vector<Bullet*> newShots = gpPlayer->fire(&gBulletTexture);
                             gBullets.insert(gBullets.end(), newShots.begin(), newShots.end());
                             Mix_PlayChannel(-1, gLaserSound, 0);
@@ -201,13 +201,13 @@ int main(int argc, char* args[])
                 case STATE_PLAYING:
                     gpPlayer->handleEvent(e);
 
-                    // µo®g¤l¼u
+                    // ç™¼å°„å­å½ˆ
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
                         std::vector<Bullet*> newShots = gpPlayer->fire(&gBulletTexture);
                         gBullets.insert(gBullets.end(), newShots.begin(), newShots.end());
                         Mix_PlayChannel( -1, gLaserSound, 0 );
                     }
-                    // ¼È°±©Î¦^¨ì¿ï³æ (¥i¿ï)
+                    // æš«åœæˆ–å›åˆ°é¸å–® (å¯é¸)
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
                         gCurrentState = STATE_MENU;
                     }
@@ -216,7 +216,7 @@ int main(int argc, char* args[])
                 case STATE_GAME_OVER:
                 case STATE_WIN:
                     if (e.type == SDL_KEYDOWN) {
-                        if (e.key.keysym.sym == SDLK_r) { // R ­«¨Ó
+                        if (e.key.keysym.sym == SDLK_r) { // R é‡ä¾†
                             resetGame();
                             gCurrentState = STATE_PLAYING;
                         }
@@ -225,18 +225,18 @@ int main(int argc, char* args[])
             }
         }
 
-        // --- ÅŞ¿è§ó·s (Update) ---
+        // --- é‚è¼¯æ›´æ–° (Update) ---
         if (gCurrentState == STATE_PLAYING)
         {
-            // 1. §ó·s¥D¨¤
+            // 1. æ›´æ–°ä¸»è§’
             gpPlayer->move();
             gpPlayer->updateScatterStatus();
 
-            // 2. ¥Í¦¨»P§ó·s¼Ä¤H/Boss (Ãö¥d¬yµ{)
+            // 2. ç”Ÿæˆèˆ‡æ›´æ–°æ•µäºº/Boss (é—œå¡æµç¨‹)
             switch (gLevelStage)
             {
                 case STAGE_1:
-                    if (rand() % 60 == 0) { // ¥Í¦¨¼Ä¤HÀW²v
+                    if (rand() % 60 == 0) { // ç”Ÿæˆæ•µäººé »ç‡
                         gEnemies.push_back(new Enemy(rand() % (SCREEN_WIDTH - 60), -60, &gEnemyTexture1, &gEnemyTexture2, &gEnemyTexture3));
                     }
                     if (gEnemiesDefeated >= 10) {
@@ -247,21 +247,21 @@ int main(int argc, char* args[])
 
                 case BOSS_1_FIGHT:
                 case BOSS_2_FIGHT:
-                    // Boss ¾Ô¤£¥Í¦¨¤p§L
+                    // Boss æˆ°ä¸ç”Ÿæˆå°å…µ
                     break;
 
                 case STAGE_2:
-                    if (rand() % 40 == 0) { // ¥Í¦¨¸û§Ö
+                    if (rand() % 40 == 0) { // ç”Ÿæˆè¼ƒå¿«
                         gEnemies.push_back(new Enemy(rand() % (SCREEN_WIDTH - 60), -60, &gEnemyTexture1, &gEnemyTexture2, &gEnemyTexture3));
                     }
-                    if (gEnemiesDefeated >= 25) { // ²Ö¿nÀ»±ş
+                    if (gEnemiesDefeated >= 25) { // ç´¯ç©æ“Šæ®º
                         gLevelStage = BOSS_2_FIGHT;
                         gpBoss = new Boss((SCREEN_WIDTH-100)/2, -100, &gBossTexture, 2);
                     }
                     break;
             }
 
-            // §ó·s Boss
+            // æ›´æ–° Boss
             if (gpBoss) {
                 gpBoss->move();
                 std::vector<Bullet*> bShots = gpBoss->fire(&gEnemyBulletTexture);
@@ -277,7 +277,7 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 3. §ó·s¼Ä¤H & ÀH¾÷±¼Ä_
+            // 3. æ›´æ–°æ•µäºº & éš¨æ©Ÿæ‰å¯¶
             for (int i = 0; i < gEnemies.size(); i++) {
                 gEnemies[i]->move();
                 std::vector<Bullet*> eShots = gEnemies[i]->fire(&gEnemyBulletTexture);
@@ -289,18 +289,18 @@ int main(int argc, char* args[])
                         gScore += 100;
                         Mix_PlayChannel(-1, gExplosionSound, 0);
 
-                        // ±¼¸¨¹D¨ã (20% ¾÷²v)
+                        // æ‰è½é“å…· (20% æ©Ÿç‡)
                         if (rand() % 5 == 0) {
-                             // ¹D¨ã¥Í¦¨¦b¼Ä¤H¦º¤`¦ì¸m
-                             // ­Y Magnifier «Øºc¤l¤£»İ­n®y¼Ğ¡A«h¥Î gItems.push_back(new Magnifier());
-                             // ­Y§Ú­Ì§ï¦^»İ­n®y¼Ğªºª©¥»:
+                             // é“å…·ç”Ÿæˆåœ¨æ•µäººæ­»äº¡ä½ç½®
+                             // è‹¥ Magnifier å»ºæ§‹å­ä¸éœ€è¦åº§æ¨™ï¼Œå‰‡ç”¨ gItems.push_back(new Magnifier());
+                             // è‹¥æˆ‘å€‘æ”¹å›éœ€è¦åº§æ¨™çš„ç‰ˆæœ¬:
                              gItems.push_back(new Magnifier(gEnemies[i]->getPosX(), gEnemies[i]->getPosY()));
                         }
-                        // ±¼¸¨heals (25% ¾÷²v)
+                        // æ‰è½heals (25% æ©Ÿç‡)
                         if (rand() % 4 == 0) {
-                             // heal¥Í¦¨¦b¼Ä¤H¦º¤`¦ì¸mªşªñ
-                             // ­Y Heal «Øºc¤l¤£»İ­n®y¼Ğ¡A«h¥Î gHeals.push_back(new Heal());
-                             // ­Y§Ú­Ì§ï¦^»İ­n®y¼Ğªºª©¥»:
+                             // healç”Ÿæˆåœ¨æ•µäººæ­»äº¡ä½ç½®é™„è¿‘
+                             // è‹¥ Heal å»ºæ§‹å­ä¸éœ€è¦åº§æ¨™ï¼Œå‰‡ç”¨ gHeals.push_back(new Heal());
+                             // è‹¥æˆ‘å€‘æ”¹å›éœ€è¦åº§æ¨™çš„ç‰ˆæœ¬:
                              gHeals.push_back(new Heal(gEnemies[i]->getPosX()+30, gEnemies[i]->getPosY()-30));
                         }
                     }
@@ -310,15 +310,15 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 4. §ó·s¤l¼u»P¸I¼²ÀË´ú
+            // 4. æ›´æ–°å­å½ˆèˆ‡ç¢°æ’æª¢æ¸¬
             for (int i = 0; i < gBullets.size(); i++) {
                 gBullets[i]->move();
                 SDL_Rect bRect = gBullets[i]->getCollider();
                 bool hit = false;
 
-                // ¥D¨¤¤l¼u vs ¼Ä¤H/Boss
+                // ä¸»è§’å­å½ˆ vs æ•µäºº/Boss
                 if (gBullets[i]->getIsFromPlayer()) {
-                    // ¼²¼Ä¤H
+                    // æ’æ•µäºº
                     for (auto& e : gEnemies) {
                         SDL_Rect eRect = e->getCollider();
                         if (SDL_HasIntersection(&bRect, &eRect)) {
@@ -327,7 +327,7 @@ int main(int argc, char* args[])
                             break;
                         }
                     }
-                    // ¼² Boss
+                    // æ’ Boss
                     if (!hit && gpBoss) {
                         SDL_Rect bossRect = gpBoss->getCollider();
                         if (SDL_HasIntersection(&bRect, &bossRect)) {
@@ -336,13 +336,13 @@ int main(int argc, char* args[])
                         }
                     }
                 }
-                // ¼Ä¤H¤l¼u vs ¥D¨¤
+                // æ•µäººå­å½ˆ vs ä¸»è§’
                 else {
                     SDL_Rect pRect = gpPlayer->getCollider();
                     if (SDL_HasIntersection(&bRect, &pRect)) {
                         gpPlayer->takeDamage(1);
                         hit = true;
-                        // ¥i¥H¥[¨ü¶Ë­µ®Ä
+                        // å¯ä»¥åŠ å—å‚·éŸ³æ•ˆ
                     }
                 }
 
@@ -355,13 +355,13 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 5.1 §ó·s¹D¨ã
+            // 5.1 æ›´æ–°é“å…·
             SDL_Rect pRect = gpPlayer->getCollider();
             for (int i = 0; i < gItems.size(); i++) {
                 gItems[i]->move();
                 SDL_Rect itemRect = gItems[i]->getCollider();
 
-                // ¦Y¨ì¹D¨ã
+                // åƒåˆ°é“å…·
                 if (SDL_HasIntersection(&pRect, &itemRect)) {
                     gpPlayer->activateScatter();
                     gItems[i]->setTaken();
@@ -375,13 +375,13 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 5.2 §ó·sheals
+            // 5.2 æ›´æ–°heals
             //SDL_Rect pRect = gpPlayer->getCollider();
             for (int i = 0; i < gHeals.size(); i++) {
                 gHeals[i]->move();
                 SDL_Rect healRect = gHeals[i]->getCollider();
 
-                // ¦Y¨ìheal
+                // åƒåˆ°heal
                 if (SDL_HasIntersection(&pRect, &healRect)) {
                     if ((gpPlayer->getHealth())<5)
                     {
@@ -398,7 +398,7 @@ int main(int argc, char* args[])
                 }
             }
 
-            // 6. ÀË¬d¥D¨¤¥Í¦º
+            // 6. æª¢æŸ¥ä¸»è§’ç”Ÿæ­»
             if (gpPlayer->getHealth() <= 0) {
                 gCurrentState = STATE_GAME_OVER;
             }
@@ -406,58 +406,58 @@ int main(int argc, char* args[])
 
         if (gCurrentState == STATE_TUTORIAL)
         {
-            // ¥Ã»·§ó·s¥D¨¤ (Åıª±®a¥i¥H°Ê)
+            // æ°¸é æ›´æ–°ä¸»è§’ (è®“ç©å®¶å¯ä»¥å‹•)
             gpPlayer->move();
 
-            // §ó·s¤l¼u (Åı¤l¼u¥i¥H­¸)
+            // æ›´æ–°å­å½ˆ (è®“å­å½ˆå¯ä»¥é£›)
             for (int i=0; i<gBullets.size(); i++) {
                  gBullets[i]->move();
-                 // ... ³o¸Ì­n¥[Â²³æªºÃä¬É²¾°£ÅŞ¿è ...
+                 // ... é€™è£¡è¦åŠ ç°¡å–®çš„é‚Šç•Œç§»é™¤é‚è¼¯ ...
             }
 
-            // --- ®Ú¾Ú±Ğ¾Ç¨BÆJ³B²z ---
-            // --- ®Ú¾Ú±Ğ¾Ç¨BÆJ³B²z ---
+            // --- æ ¹æ“šæ•™å­¸æ­¥é©Ÿè™•ç† ---
+            // --- æ ¹æ“šæ•™å­¸æ­¥é©Ÿè™•ç† ---
             switch (gTutStep)
             {
                 case TUT_ENEMY_ACTION:
-                    // ¥Í¦¨¤@°¦±Ğ¾Ç¼Ä¤H
+                    // ç”Ÿæˆä¸€éš»æ•™å­¸æ•µäºº
                     if (!gTutObjectSpawned) {
-                        // ¥Í¦¨¨ÃÅı¥¦°±¦b¤¤¶¡ (stopAtMiddle = true)
+                        // ç”Ÿæˆä¸¦è®“å®ƒåœåœ¨ä¸­é–“ (stopAtMiddle = true)
                         gEnemies.push_back(new Enemy(SCREEN_WIDTH/2 - 30, -50, &gEnemyTexture1, &gEnemyTexture2, &gEnemyTexture3, true));
                         gTutObjectSpawned = true;
                     }
 
-                    // §ó·s¼Ä¤H»P¸I¼²
+                    // æ›´æ–°æ•µäººèˆ‡ç¢°æ’
                     if (!gEnemies.empty()) {
                         Enemy* e = gEnemies[0];
                         e->move();
 
-                        // ¨ú±o¼Ä¤H¸I¼²½c (¸Ñ¨M eRect error)
+                        // å–å¾—æ•µäººç¢°æ’ç®± (è§£æ±º eRect error)
                         SDL_Rect eRect = e->getCollider();
 
-                        // ¤l¼u¸I¼²§P©w
+                        // å­å½ˆç¢°æ’åˆ¤å®š
                         for (int i = 0; i < gBullets.size(); i++) {
-                            // ¨ú±o¤l¼u¸I¼²½c (¸Ñ¨M bRect error)
+                            // å–å¾—å­å½ˆç¢°æ’ç®± (è§£æ±º bRect error)
                             SDL_Rect bRect = gBullets[i]->getCollider();
 
                             if (SDL_HasIntersection(&bRect, &eRect)) {
                                 e->takeDamage(1);
-                                gBullets[i]->setHit(); // ¤l¼uÀ»¤¤¥¢®Ä
+                                gBullets[i]->setHit(); // å­å½ˆæ“Šä¸­å¤±æ•ˆ
                             }
                         }
 
-                        // ÀË¬d¬O§_¦º¤`
+                        // æª¢æŸ¥æ˜¯å¦æ­»äº¡
                         if (e->isDead()) {
                             delete e;
                             gEnemies.clear();
-                            gTutStep = TUT_ENEMY_TEXT; // ¶i¤J¤U¤@¶¥¬q¤å¦r
+                            gTutStep = TUT_ENEMY_TEXT; // é€²å…¥ä¸‹ä¸€éšæ®µæ–‡å­—
                         }
                     }
                     break;
 
                 case TUT_ITEM_MAG_ACTION:
                     if (!gTutObjectSpawned) {
-                        // ¥Í¦¨©ñ¤jÃè
+                        // ç”Ÿæˆæ”¾å¤§é¡
                         gItems.push_back(new Magnifier(SCREEN_WIDTH/2 - 20, -50, true));
                         gTutObjectSpawned = true;
                     }
@@ -465,23 +465,23 @@ int main(int argc, char* args[])
                      if (!gItems.empty()) {
                          gItems[0]->move();
 
-                         // ©w¸q¸I¼²½c (¸Ñ¨M pRect, itemRect error)
+                         // å®šç¾©ç¢°æ’ç®± (è§£æ±º pRect, itemRect error)
                          SDL_Rect pRect = gpPlayer->getCollider();
                          SDL_Rect itemRect = gItems[0]->getCollider();
 
-                         // §PÂ_¥D¨¤¦Y¨ì
+                         // åˆ¤æ–·ä¸»è§’åƒåˆ°
                          if (SDL_HasIntersection(&pRect, &itemRect)) {
-                             gpPlayer->activateScatter(); // ¦Y¹D¨ã®ÄªG
+                             gpPlayer->activateScatter(); // åƒé“å…·æ•ˆæœ
                              delete gItems[0];
                              gItems.clear();
-                             gTutStep = TUT_ITEM_MAG_TEXT; // ¤U¤@¨B
+                             gTutStep = TUT_ITEM_MAG_TEXT; // ä¸‹ä¸€æ­¥
                          }
                      }
                     break;
 
                 case TUT_ITEM_HEAL_ACTION:
                     if (!gTutObjectSpawned) {
-                        // ¥Í¦¨¸É¦å (stopAtMiddle = true)
+                        // ç”Ÿæˆè£œè¡€ (stopAtMiddle = true)
                         gHeals.push_back(new Heal(SCREEN_WIDTH/2 - 20, -50, true));
                         gTutObjectSpawned = true;
                     }
@@ -489,22 +489,22 @@ int main(int argc, char* args[])
                      if (!gHeals.empty()) {
                          gHeals[0]->move();
 
-                         // ©w¸q¸I¼²½c
+                         // å®šç¾©ç¢°æ’ç®±
                          SDL_Rect pRect = gpPlayer->getCollider();
                          SDL_Rect healRect = gHeals[0]->getCollider();
 
                          if (SDL_HasIntersection(&pRect, &healRect)) {
-                             // ¸É¦åÅŞ¿è (°²³]§A¦³¼g³o­Ó¨ç¦¡¡A©Îª½±µ§ï¦å¶q)
+                             // è£œè¡€é‚è¼¯ (å‡è¨­ä½ æœ‰å¯«é€™å€‹å‡½å¼ï¼Œæˆ–ç›´æ¥æ”¹è¡€é‡)
                              gpPlayer->addHealth(1);
 
                              delete gHeals[0];
                              gHeals.clear();
-                             gTutStep = TUT_FINAL_TEXT; // ¤U¤@¨B
+                             gTutStep = TUT_FINAL_TEXT; // ä¸‹ä¸€æ­¥
                          }
                      }
                      break;
 
-                // ³B²z¥¼¨Ï¥Îªº case ¥H®ø°£ Warning
+                // è™•ç†æœªä½¿ç”¨çš„ case ä»¥æ¶ˆé™¤ Warning
                 case TUT_INTRO_1:
                 case TUT_INTRO_2:
                 case TUT_INTRO_3:
@@ -515,9 +515,9 @@ int main(int argc, char* args[])
             }
         }
 
-        // --- ´è¬V (Render) ---
+        // --- æ¸²æŸ“ (Render) ---
 
-        // ²M°£µe­± (¶Â¦â­I´º)
+        // æ¸…é™¤ç•«é¢ (é»‘è‰²èƒŒæ™¯)
         SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
         SDL_RenderClear( gRenderer );
 
@@ -526,25 +526,25 @@ int main(int argc, char* args[])
         }
         else if (gCurrentState == STATE_TUTORIAL)
         {
-            gBGTexture.render(0, 0); // µe­I´º
-            gpPlayer->render();      // µe¥D¨¤
+            gBGTexture.render(0, 0); // ç•«èƒŒæ™¯
+            gpPlayer->render();      // ç•«ä¸»è§’
 
-            // µe±Ğ¾Çª«¥ó
+            // ç•«æ•™å­¸ç‰©ä»¶
             for(auto e : gEnemies) e->render();
             for(auto b : gBullets) b->render();
             for(auto i : gItems) i->render();
-            for(auto h : gHeals) h->render(); // °O±oµe¸É¦å¥]
+            for(auto h : gHeals) h->render(); // è¨˜å¾—ç•«è£œè¡€åŒ…
 
 
-            // ®Ú¾Ú¨BÆJµe UI ¹ï¸Ü®Ø
+            // æ ¹æ“šæ­¥é©Ÿç•« UI å°è©±æ¡†
             if (gTutStep == TUT_INTRO_1) {
-                renderTutorialBox("§A¤w³Q§ë®g§¹¦¨¡C¨­¤À½T»{¡X¡XÆ[´úªÌ¡C\n¥Ø«e©Ò¦b¦ì¸m¡G¥¢±±ªº¶q¤l­pºâ®Ö¤ß¤º¼h"); // ²Ä¤@¬q¤å¦r
+                renderTutorialBox("ä½ å·²è¢«æŠ•å°„å®Œæˆã€‚èº«åˆ†ç¢ºèªâ€”â€”è§€æ¸¬è€…ã€‚\nç›®å‰æ‰€åœ¨ä½ç½®ï¼šå¤±æ§çš„é‡å­è¨ˆç®—æ ¸å¿ƒå…§å±¤"); // ç¬¬ä¸€æ®µæ–‡å­—
             }
             else if (gTutStep == TUT_INTRO_2) {
-                renderTutorialBox("Your mission is to defend the galaxy."); // ²Ä¤G¬q¤å¦r
+                renderTutorialBox("Your mission is to defend the galaxy."); // ç¬¬äºŒæ®µæ–‡å­—
             }
             else if (gTutStep == TUT_INTRO_3) {
-                renderTutorialBox("Use ARROW KEYS to move."); // ²Ä¤T¬q¤å¦r
+                renderTutorialBox("Use ARROW KEYS to move."); // ç¬¬ä¸‰æ®µæ–‡å­—
             }
             else if (gTutStep == TUT_ENEMY_TEXT) {
                 renderTutorialBox("Great! Use SPACE to shoot.");
@@ -557,10 +557,10 @@ int main(int argc, char* args[])
             }
         }
         else if (gCurrentState == STATE_PLAYING) {
-            // µe­I´º (¦p¦³)
+            // ç•«èƒŒæ™¯ (å¦‚æœ‰)
             gBGTexture.render(0, 0);
 
-            // µe¨¤¦â
+            // ç•«è§’è‰²
             gpPlayer->render();
             if (gpBoss) gpBoss->render();
             for (auto e : gEnemies) e->render();
@@ -568,7 +568,7 @@ int main(int argc, char* args[])
             for (auto item : gItems) item->render();
             for (auto heal : gHeals) heal->render();
 
-            // µe UI
+            // ç•« UI
             std::stringstream timeText;
             timeText << "Score: " << gScore << "  HP: " << gpPlayer->getHealth();
             gScoreTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor, gFont, gRenderer);
@@ -579,14 +579,14 @@ int main(int argc, char* args[])
         else if (gCurrentState == STATE_GAME_OVER) {
             gGameOverTexture.render(0, 0);
 
-            // Åã¥Ü³Ì²×¤À¼Æ
+            // é¡¯ç¤ºæœ€çµ‚åˆ†æ•¸
             std::stringstream finalScore;
             finalScore << "Final Score: " << gScore;
             gScoreTextTexture.loadFromRenderedText(finalScore.str().c_str(), textColor, gFont, gRenderer);
             gScoreTextTexture.render(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 + 50);
         }
         else if (gCurrentState == STATE_WIN) {
-            // °²³]§A¦³³Ó§Q¹Ï¡A­Y¨S¦³´N¦@¥Î GameOver ©Î¯Â¤å¦r
+            // å‡è¨­ä½ æœ‰å‹åˆ©åœ–ï¼Œè‹¥æ²’æœ‰å°±å…±ç”¨ GameOver æˆ–ç´”æ–‡å­—
             if (gWinTexture.getWidth() > 0) gWinTexture.render(0, 0);
             else gGameOverTexture.render(0, 0);
 
@@ -596,24 +596,24 @@ int main(int argc, char* args[])
             gScoreTextTexture.render(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2);
         }
 
-        // §ó·s¿Ã¹õ
+        // æ›´æ–°è¢å¹•
         SDL_RenderPresent( gRenderer );
     }
 
-    // ÄÀ©ñ¸ê·½¨Ã°h¥X
+    // é‡‹æ”¾è³‡æºä¸¦é€€å‡º
     close();
     return 0;
 }
 
 // =============================================================
-// »²§U¨ç¦¡¹ê§@
+// è¼”åŠ©å‡½å¼å¯¦ä½œ
 // =============================================================
 
 bool init()
 {
     if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 ) return false;
 
-    // ³]©w½u©Ê¹LÂo
+    // è¨­å®šç·šæ€§éæ¿¾
     if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) ) {}
 
     gWindow = SDL_CreateWindow( "EEmission", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
@@ -641,19 +641,19 @@ bool loadMedia()
 {
     bool success = true;
 
-    // ¸ü¤J¦rÅé
+    // è¼‰å…¥å­—é«”
     gFont = TTF_OpenFont( "BoutiqueBitmap9x9_1.92.ttf", 28 );
     if( gFont == NULL ) { printf("Failed to load font!\n"); success = false; }
 
-    // ¸ü¤J¤¶­±¹Ï¤ù (½Ğ¦Û¦æ·Ç³Æ³o¨Ç¹Ï¤ù)
+    // è¼‰å…¥ä»‹é¢åœ–ç‰‡ (è«‹è‡ªè¡Œæº–å‚™é€™äº›åœ–ç‰‡)
     if( !gMenuTexture.loadFromFile( "menu.png", gRenderer ) ) success = false;
     //if( !gInstructionTexture.loadFromFile( "instruction.png", gRenderer ) ) success = false;
     if( !gGameOverTexture.loadFromFile( "gameover.png", gRenderer ) ) success = false;
-    gHelperTexture.loadFromFile("helper.png", gRenderer); // ½Ğ·Ç³Æ³o±i¹Ï
-    // gWinTexture.loadFromFile("win.png", gRenderer); // ¥i¿ï
-    // gBGTexture.loadFromFile("bg.png", gRenderer);   // ¥i¿ï
+    gHelperTexture.loadFromFile("helper.png", gRenderer); // è«‹æº–å‚™é€™å¼µåœ–
+    // gWinTexture.loadFromFile("win.png", gRenderer); // å¯é¸
+    // gBGTexture.loadFromFile("bg.png", gRenderer);   // å¯é¸
 
-    // ¸ü¤J¨¤¦â¹Ï¤ù
+    // è¼‰å…¥è§’è‰²åœ–ç‰‡
     if( !gPlayerFront.loadFromFile( "player.png", gRenderer ) ) success = false;
     if( !gPlayerLeft.loadFromFile( "player_left.png", gRenderer ) ) success = false;
     if( !gPlayerRight.loadFromFile( "player_right.png", gRenderer ) ) success = false;
@@ -668,11 +668,11 @@ bool loadMedia()
     if( !gMagnifierTexture.loadFromFile( "magnifier.png", gRenderer ) ) success = false;
     if( !gHealTexture.loadFromFile( "heal.png", gRenderer ) ) success = false;
 
-    // ¸ü¤J­µ®Ä
+    // è¼‰å…¥éŸ³æ•ˆ
     gMusic = Mix_LoadMUS( "bgm.mp3" );
     gLaserSound = Mix_LoadWAV( "laser.wav" );
     gExplosionSound = Mix_LoadWAV( "explosion.wav" );
-    gItemSound = Mix_LoadWAV( "item.wav" ); // °²³]§A¦³³o­Ó
+    gItemSound = Mix_LoadWAV( "item.wav" ); // å‡è¨­ä½ æœ‰é€™å€‹
     gHealSound = Mix_LoadWAV( "heal.wav" );
 
     return success;
@@ -680,7 +680,7 @@ bool loadMedia()
 
 void close()
 {
-    // ÄÀ©ñª«¥ó
+    // é‡‹æ”¾ç‰©ä»¶
     if(gpPlayer) delete gpPlayer;
     if(gpBoss) delete gpBoss;
     for(auto e : gEnemies) delete e;
@@ -688,7 +688,7 @@ void close()
     for(auto i : gItems) delete i;
     for(auto j : gHeals) delete j;
 
-    // ÄÀ©ñ¯¾²z
+    // é‡‹æ”¾ç´‹ç†
     gPlayerFront.free();
     gPlayerLeft.free();
     gPlayerRight.free();
@@ -706,14 +706,14 @@ void close()
     gScoreTextTexture.free();
     gHealthIconTexture.free();
 
-    // ÄÀ©ñ­µ®Ä
+    // é‡‹æ”¾éŸ³æ•ˆ
     Mix_FreeMusic( gMusic );
     Mix_FreeChunk( gLaserSound );
     Mix_FreeChunk( gExplosionSound );
     Mix_FreeChunk( gItemSound );
     Mix_FreeChunk( gHealSound );
 
-    // Ãö³¬ SDL ¤l¨t²Î
+    // é—œé–‰ SDL å­ç³»çµ±
     TTF_CloseFont( gFont );
     SDL_DestroyRenderer( gRenderer );
     SDL_DestroyWindow( gWindow );
@@ -726,24 +726,24 @@ void close()
 
 void resetGame()
 {
-    // ­«¸mÃö¥d¼Æ­È
+    // é‡ç½®é—œå¡æ•¸å€¼
     gEnemiesDefeated = 0;
     gScore = 0;
     gLevelStage = STAGE_1;
 
-    // ­«¸m¥D¨¤ (³o¸Ì°²³] Player Ãş§O¦³¹ê§@ reset)
-    // ¦pªG¨S¦³¡A§A¤]¥i¥H¦b³o¸Ì delete gpPlayer; gpPlayer = new Player(...);
+    // é‡ç½®ä¸»è§’ (é€™è£¡å‡è¨­ Player é¡åˆ¥æœ‰å¯¦ä½œ reset)
+    // å¦‚æœæ²’æœ‰ï¼Œä½ ä¹Ÿå¯ä»¥åœ¨é€™è£¡ delete gpPlayer; gpPlayer = new Player(...);
     if(gpPlayer) {
-        // Â²³æªº¤è¦¡¡Gª½±µ­«¸m¦ì¸m©M¦å¶q
-        // ¦pªG§Aªº Player Ãş§O¨S¦³ reset()¡A½Ğ°O±o¥[¤W¥h
+        // ç°¡å–®çš„æ–¹å¼ï¼šç›´æ¥é‡ç½®ä½ç½®å’Œè¡€é‡
+        // å¦‚æœä½ çš„ Player é¡åˆ¥æ²’æœ‰ reset()ï¼Œè«‹è¨˜å¾—åŠ ä¸Šå»
         // gpPlayer->reset();
 
-        // ©ÎªÌ¤â°Ê­«¸m¡G
+        // æˆ–è€…æ‰‹å‹•é‡ç½®ï¼š
         delete gpPlayer;
         gpPlayer = new Player(&gPlayerFront, &gPlayerLeft, &gPlayerRight);
     }
 
-    // ²MªÅ¼Ä¤H¡B¤l¼u¡B¹D¨ã¡BBoss
+    // æ¸…ç©ºæ•µäººã€å­å½ˆã€é“å…·ã€Boss
     for(auto e : gEnemies) delete e;
     gEnemies.clear();
 
@@ -764,24 +764,24 @@ void resetGame()
 
 void renderTutorialBox(std::string text)
 {
-    // 1. µe¥b³z©ú¶Â¦âªø¤è§Î
-    SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND); // ¶}±Ò²V¦X¼Ò¦¡
-    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 180); // ¶Â¦â¡Aalpha=180 (¥b³z©ú)
+    // 1. ç•«åŠé€æ˜é»‘è‰²é•·æ–¹å½¢
+    SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND); // é–‹å•Ÿæ··åˆæ¨¡å¼
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 180); // é»‘è‰²ï¼Œalpha=180 (åŠé€æ˜)
 
-    SDL_Rect fillRect = { 0, SCREEN_HEIGHT - 200, SCREEN_WIDTH, 200 }; // ¤U¤è 200 pixel °ª
+    SDL_Rect fillRect = { 0, SCREEN_HEIGHT - 200, SCREEN_WIDTH, 200 }; // ä¸‹æ–¹ 200 pixel é«˜
     SDL_RenderFillRect(gRenderer, &fillRect);
 
-    SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_NONE); // Ãö³¬²V¦X¼Ò¦¡
+    SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_NONE); // é—œé–‰æ··åˆæ¨¡å¼
 
-    // 2. µeºëÆF¹Ï¤ù (¥ª¤U¨¤)
+    // 2. ç•«ç²¾éˆåœ–ç‰‡ (å·¦ä¸‹è§’)
     gHelperTexture.render(20, SCREEN_HEIGHT - gHelperTexture.getHeight() - 20);
 
-    // 3. µe¤å¦r
+    // 3. ç•«æ–‡å­—
     SDL_Color textColor = { 255, 255, 255 };
-    // ³o¸Ì¬°¤F¤è«K¡A¨C¦¸³£¥Í¦¨¤å¦r¯¾²z¡A®Ä¯à²¤®t¦ı¦b±Ğ¾Ç­¶­±¨SÃö«Y
-    // ¤å¦r¦ì¸m­n¦bºëÆF¥kÃä
+    // é€™è£¡ç‚ºäº†æ–¹ä¾¿ï¼Œæ¯æ¬¡éƒ½ç”Ÿæˆæ–‡å­—ç´‹ç†ï¼Œæ•ˆèƒ½ç•¥å·®ä½†åœ¨æ•™å­¸é é¢æ²’é—œä¿‚
+    // æ–‡å­—ä½ç½®è¦åœ¨ç²¾éˆå³é‚Š
     LTexture tempText;
     tempText.loadFromRenderedText(text, textColor, gFont, gRenderer);
-    tempText.render(200, SCREEN_HEIGHT - 150); // ½Õ¾ã¤å¦r®y¼Ğ
+    tempText.render(200, SCREEN_HEIGHT - 150); // èª¿æ•´æ–‡å­—åº§æ¨™
     tempText.free();
 }
