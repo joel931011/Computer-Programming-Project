@@ -1,0 +1,273 @@
+#include <SDL2/SDL.h>
+#include <iostream>
+#include <cmath> 
+#include <algorithm> // for std::max
+
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+#define MAX_BULLETS 1000000
+#define PI 3.14159265
+
+// ------------------------------------------------
+// 基礎向量類別
+// ------------------------------------------------
+class Vec {
+public:
+    float vx, vy;
+
+    Vec(float vx = 0, float vy = 0) : vx(vx), vy(vy) {}
+
+    void setSpeed(float sx, float sy) {
+        vx = sx;
+        vy = sy;
+    }
+};
+
+// ------------------------------------------------
+// 擴展子彈類別 (新增 accel 和 curve)
+// ------------------------------------------------
+class AdvancedBullet : public Vec {
+public:
+    float x, y;
+    bool active;
+    float direction; // 儲存角度 (弧度)
+    float speed;     // 速度大小 (v)
+    float accel;     // 加速度 (每秒速度變化量)
+    float curve;     // 角度變化率 (每秒弧度變化量)
+
+    AdvancedBullet() : Vec(), direction(0), speed(0), accel(0), curve(0) {
+        active = false;
+    }
+
+    void fire(float startX, float startY, float v, float theta, float a, float c) {
+        x = startX;
+        y = startY;
+        direction = theta;
+        speed = v;
+        accel = a;
+        curve = c;
+        active = true;
+
+        setSpeed(speed * cos(direction), speed * sin(direction));
+    }
+
+    void update(float dt) {
+        if (!active) return;
+
+        direction += curve * dt;
+        speed += accel * dt;
+
+        // 重新計算速度分量
+        vx = speed * cos(direction);
+        vy = speed * sin(direction);
+
+        x += vx * dt;
+        y += vy * dt;
+
+        if (x < 0 || x > SCREEN_WIDTH || y < 0 || y > SCREEN_HEIGHT || speed < 0)
+            active = false;
+    }
+};
+
+// ------------------------------------------------
+// 全域子彈管理
+// ------------------------------------------------
+AdvancedBullet advanced_bullets[MAX_BULLETS];
+
+// 替換原有的 shootBullet
+void shootAdvancedBullet(float x, float y, float v, float theta = 0.0f, float accel = 0.0f, float curve = 0.0f) {
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (!advanced_bullets[i].active) {
+            advanced_bullets[i].fire(x, y, v, theta, accel, curve);
+            break;
+        }
+    }
+}
+
+// 新增：子彈更新函式
+void updateAdvancedBullets(float dt) {
+    for (int i = 0; i < MAX_BULLETS; i++)
+        advanced_bullets[i].update(dt);
+}
+
+// 新增：子彈渲染函式 (建議使用 SDL_RenderDrawPoints 以提高效率，但這裡仍用 Rect 保持代碼風格一致)
+void renderAdvancedBullets(SDL_Renderer* renderer) {
+    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // 黃色子彈
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (advanced_bullets[i].active) {
+            SDL_Rect rect = { (int)advanced_bullets[i].x, (int)advanced_bullets[i].y, 1, 1 };
+            SDL_RenderFillRect(renderer, &rect);
+        }
+    }
+}
+
+// ------------------------------------------------
+// GMS 彈幕控制類別
+// ------------------------------------------------
+class GMSBulletPattern {
+public:
+    int total_arrays = 1;      // 陣列 (Array) 數量
+    int bullets = 10;          // 每個陣列中的子彈數量
+    float array_spread = PI * 2;
+    float spread = PI / 4.0f;
+    float base_angle = 0.0f;
+    float start_angle = 0.0f;
+    float bullet_speed = 150.0f;
+    float bullet_accel = 0.0f;
+    float bullet_curve = 0.0f;
+    float x_offset = 0.0f;
+    float y_offset = 0.0f;
+    float object_width = 0.0f; // lengthdir 距離 (Player 尺寸)
+    float object_height = 0.0f;
+    int fire_rate = 10;        // 射擊間隔幀數 (以 dt/time 計算)
+    float spin = 0.0f;
+    float spin_mod = 0.0f;
+    float max_spin_spd = PI/2.0f;
+    bool spin_reverse = false;
+
+private:
+    float shoot_timer = 0.0f;
+
+public:
+    void updateAndFire(float dt, float x, float y) {
+        shoot_timer += dt;
+        // 假設 60 FPS
+        const float FPS = 60.0f;
+        float fire_interval = fire_rate / FPS;
+
+        if (shoot_timer >= fire_interval) {
+            shoot_timer = 0.0f;
+
+            // 確保分母不為零，使用 std::max(1, ...)
+            int bb = std::max(1, bullets - 1);
+            int aa = std::max(1, total_arrays - 1);
+
+            float a_ang = (array_spread / aa); // 陣列間角度步進
+            float b_ang = (spread / bb);       // 陣列內子彈角度步進
+
+            // 實際彈幕發射
+            for (int j = 0; j < total_arrays; j++) {
+                for (int i = 0; i < bullets; i++) {
+
+                    float current_angle = base_angle + (b_ang * i) + (a_ang * j) + start_angle;
+
+                    // lengthdir_x/y: 從 (x,y) 偏移一段距離 (object_width/height)
+                    float xx = x + x_offset + object_width * cos(current_angle);
+                    float yy = y + y_offset + object_height * sin(current_angle);
+
+                    ::shootAdvancedBullet(
+                        xx, yy,
+                        bullet_speed,
+                        current_angle,
+                        bullet_accel,
+                        bullet_curve
+                    );
+                }
+            }
+
+            // 旋轉和 Spin Mod 邏輯
+            base_angle += spin;
+            spin += spin_mod;
+
+            if (spin_reverse) {
+                if (spin < -max_spin_spd || spin > max_spin_spd) {
+                    spin_mod = -spin_mod;
+                }
+            }
+        }
+    }
+};
+
+// ------------------------------------------------
+// 實例化 GMS 風格的彈幕控制器 (可以有多個實例)
+// ------------------------------------------------
+GMSBulletPattern StarSpiral;
+
+// 設定一個範例彈幕模式
+void setupStarSpiralPattern() {
+    StarSpiral.total_arrays = 4;
+    StarSpiral.bullets = 6;
+    StarSpiral.array_spread = 2 * PI;
+    StarSpiral.spread = PI / 8.0f;
+    StarSpiral.bullet_speed = 100.0f;
+    StarSpiral.spin = 0.05f;
+    StarSpiral.spin_mod = 0.001f;
+    StarSpiral.bullet_curve = 0.5f;
+    StarSpiral.fire_rate = 5;
+    //
+}
+
+int main(int argc, char* argv[]) {
+    // 設置彈幕模式參數 (在 main 之前呼叫 setupStarSpiralPattern() 或直接設定)
+    setupStarSpiralPattern();
+
+    // ... SDL 初始化代碼 (不變)
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Window* window = SDL_CreateWindow(
+        "SDL Bullet Demo",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        SCREEN_WIDTH, SCREEN_HEIGHT, 0
+    );
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    bool running = true;
+    SDL_Event event;
+    Uint32 lastTime = SDL_GetTicks();
+    float playerX = 100, playerY = 300;
+
+    // 移除 shootBulletall Shooter;
+    // 彈幕發射將由 StarSpiral.updateAndFire(dt, ...) 在迴圈中自動完成
+
+    while (running) {
+        Uint32 current = SDL_GetTicks();
+        float dt = (current - lastTime) / 1000.0f;
+        lastTime = current;
+
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT)
+                running = false;
+
+            // 由於採用自動發射模式，這裡不再需要單鍵觸發複雜彈幕
+            if (event.type == SDL_KEYDOWN) {
+                switch(event.key.keysym.sym) {
+                    case SDLK_SPACE:
+                        // 範例：SPACE 鍵用於切換模式或重置參數
+                        StarSpiral.bullet_speed = (StarSpiral.bullet_speed == 100.0f) ? 200.0f : 100.0f;
+                        break;
+                    case SDLK_RETURN:
+                        // 範例：ENTER 鍵用於臨時加速旋轉
+                        StarSpiral.spin = 0.1f;
+                        break;
+                }
+            }
+        }
+
+        // ------------------------------------
+        // 核心更新邏輯：只使用新的系統
+        // ------------------------------------
+        // 1. 執行 GMS 彈幕邏輯 (自動發射)
+        StarSpiral.updateAndFire(dt, playerX, playerY);
+
+        // 2. 更新所有 AdvancedBullet
+        updateAdvancedBullets(dt);
+
+        // 3. 渲染
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        // 渲染玩家
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_Rect player = { (int)playerX, (int)playerY, 20, 20 };
+        SDL_RenderFillRect(renderer, &player);
+
+        // 渲染 AdvancedBullet
+        renderAdvancedBullets(renderer);
+
+        SDL_RenderPresent(renderer);
+    }
+
+    // ... SDL 清理代碼 (不變)
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    return 0;
+}
